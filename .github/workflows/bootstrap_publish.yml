@@ -12,11 +12,13 @@ jobs:
   publish-exact-refs:
     runs-on: ubuntu-latest
     steps:
-      - name: Restore and verify Git bundle
+      - name: Initialize bundle payload
+        shell: bash
+        run: rm -f /tmp/goldai.bundle.b64
+      - name: Append bundle payload part 1
         shell: bash
         run: |
-          set -euo pipefail
-          cat > /tmp/goldai.bundle.b64 <<'GOLDAI_BUNDLE'
+          cat >> /tmp/goldai.bundle.b64 <<'GOLDAI_PART_1'
           IyB2MiBnaXQgYnVuZGxlCjVhODk0YjM1Y2ZmMjEzMWU4YTZkMDQyMTA3MWU3OTIyNTkyNzdjM2Ug
           cmVmcy9oZWFkcy9tYWluCjAxNjRjMWNjMTQzOTA2ZGIyZWZlNTJhM2ZmZjUyYTdjYmJkMTdkMWYg
           cmVmcy9oZWFkcy9nb2xkYWktYXV0b25vbW91cy12MQoKUEFDSwAAAAIAAABQlRV4nK2NO07FMBAA
@@ -171,6 +173,11 @@ jobs:
           WxasoqfP69XTjL51mmkvMmSyGov2Ql4GiV6iU4yUfijHqd7EV4cTl+oQNO5oI1vQmECnAvY8FDEU
           vlY16SWWDEwZKRwkzi5kvV/Q6m69fP6+/Ll6evgByC3XUJqmPS0AEre6q8YFhhAovlzWv8xGE0x+
           wTlctcvH1ct/LSMhjS5UD8pMXjNvgngaa/8yPavveY+aGjNvhdgVPZxGnHXQtk7xuOTlbMRB5TcB
+          GOLDAI_PART_1
+      - name: Append bundle payload part 2
+        shell: bash
+        run: |
+          cat >> /tmp/goldai.bundle.b64 <<'GOLDAI_PART_2'
           qIPa0jHQKMORIJSllNEbh9OdXEr+sEDAAO01ai7qSOBJIYXRRbcqhtiX09F9iyTF9ABoSz05jimq
           43BugdCC74zup97xwmQIfITgoZbR7lNS+naPkdeU6zAkm+h5ZIkQ3T+vMGFq040GLcdL5h8X9IXt
           tUqZKtvq9u0dHDW4j/am+QRBySagTQ3704vIXarBj+/yrTu7TnrOhI0dxzhoczyPm9FqkFN0mNJL
@@ -325,6 +332,11 @@ jobs:
           upqvl1ZFTxPDFOlyEcxlXNThDJ0ti375CcAPGy4FG42s2enZkSs2vcnIsuagmzN6/8KT0mg1M8Eb
           GG5dLjvFtzgGOYGzCa4UmmvDRFcWSscq0+t2R/Uq3msYIRb2FwMVNuow5Qp4k5lWaq6aaG9o7jl2
           8zxnEU+gKezDobvNY37NjcajHOlc2qtXsx+lMAoO6lDzh1ZfQqp4VmRhqz+dhN6vkDhOCEnJK/b/
+          GOLDAI_PART_2
+      - name: Append bundle payload part 3
+        shell: bash
+        run: |
+          cat >> /tmp/goldai.bundle.b64 <<'GOLDAI_PART_3'
           6NivEuYwsQnz1YmwtA/5FjAb9U7pApxAEdeQETz4qm2eNxWQPO5wrg1726U28FV5P0vUZjWoqLjG
           U5qLVZ40krlR+E39jtHxpvLGU3wuaK5vpPlRl91/f26855LoGW+73rmLDNElBqT0RsOG+6Q05i54
           K25CdKEhIYa96y7UukPM4XYJ5fziHX10NpufHNvD2X25V/Dh/NdDy7P/jnM2uzieXVie+3Lci5M/
@@ -477,17 +489,21 @@ jobs:
           tKlW/2g98OZUW+1X1S3Zrwt8ItpfwLgI40KdCxBEaOyw+A8h/13vBE04Gj40CswOetePkej+ORyu
           iYBD4pFmYZE1VNA41LutRiWcyoeZK+OiHGVti47rkyRpD7SEZk69wlVb8NH8qbTLY7YCCzGBTpDc
           OoIbe0dNnSBd2X4H9uP2rT9L7hLqIHicAwAAAAABnvVb5r8oOP6EjWLJExh372bCa14=
-                    GOLDAI_BUNDLE
-                    base64 --decode /tmp/goldai.bundle.b64 > /tmp/goldai.bundle
-                    git init --quiet /tmp/goldai-verify
-                    git -C /tmp/goldai-verify bundle verify /tmp/goldai.bundle
-                - name: Publish exact refs
-                  shell: bash
-                  env:
-                    GH_TOKEN: ${{ github.token }}
-                    GH_REPOSITORY: ${{ github.repository }}
-                  run: |
-                    set -euo pipefail
+          GOLDAI_PART_3
+      - name: Restore and verify Git bundle
+        shell: bash
+        run: |
+          set -euo pipefail
+          base64 --decode /tmp/goldai.bundle.b64 > /tmp/goldai.bundle
+          git init --quiet /tmp/goldai-verify
+          git -C /tmp/goldai-verify bundle verify /tmp/goldai.bundle
+      - name: Publish exact refs
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPOSITORY: ${{ github.repository }}
+        run: |
+          set -euo pipefail
           git init --quiet /tmp/goldai-publish
           cd /tmp/goldai-publish
           git fetch /tmp/goldai.bundle \
@@ -496,6 +512,6 @@ jobs:
           test "$(git rev-parse refs/heads/main)" = "5a894b35cff2131e8a6d0421071e792259277c3e"
           test "$(git rev-parse refs/heads/goldai-autonomous-v1)" = "0164c1cc143906db2efe52a3fff52a7cbbd17d1f"
           git remote add origin "https://x-access-token:${GH_TOKEN}@github.com/${GH_REPOSITORY}.git"
-                    git push --force origin \
-                      refs/heads/main:refs/heads/main \
-                      refs/heads/goldai-autonomous-v1:refs/heads/goldai-autonomous-v1
+          git push --force origin \
+            refs/heads/main:refs/heads/main \
+            refs/heads/goldai-autonomous-v1:refs/heads/goldai-autonomous-v1
