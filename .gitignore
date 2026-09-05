@@ -1,0 +1,39 @@
+# Secrets and local settings
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.coverage
+htmlcov/
+.mypy_cache/
+.ruff_cache/
+.venv/
+venv/
+dist/
+build/
+*.egg-info/
+
+# Editors and OS
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+
+# Runtime data and credentials
+*.db
+*.sqlite*
+*.log
+data/raw/*
+data/canonical/*
+data/bars/*
+data/features/*
+!data/**/.gitkeep
+vault/*
+!vault/.gitkeep
+

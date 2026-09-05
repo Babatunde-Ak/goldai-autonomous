@@ -1,0 +1,16 @@
+{
+  "execution_mode": "OBSERVE_ONLY",
+  "symbols": ["XAUUSD"],
+  "timeframes": ["M5", "M15", "H1"],
+  "enabled_strategies": [],
+  "market_data_source": "NOT_CONFIGURED",
+  "storage_url": "sqlite:///data/goldai.db",
+  "log_level": "INFO",
+  "risk": {
+    "maximum_position_risk_pct": 0.25,
+    "maximum_total_exposure_pct": 0.5,
+    "maximum_concurrent_positions": 1,
+    "daily_loss_lock_pct": 1.0
+  }
+}
+
