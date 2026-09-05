@@ -90,3 +90,20 @@ Milestone 2 keeps fail-closed authorization. MT5 DEMO execution remains disabled
 ## Dependency rule
 
 Dependencies point inward. Source adapters depend on canonical domain types. Canonical domain types do not depend on adapters. Persistence, broker, notifications, AI, and UI integrations stay outside deterministic strategy logic.
+
+## Milestone 3 independent replay
+
+`replay.contracts` defines immutable run/cost configuration and the trade ledger contract.
+`StrategyReplayRunner` feeds streaming canonical ticks into a monotonic `ReplayClock` and
+one existing candle aggregator at the strategy's decision timeframe. Before the arriving
+quote is visible, completed bars enter the unchanged M2 strategy wrapper. A READY decision
+creates pending intent. `FillSimulator` converts intent into simulated executable-side fills
+and observes stop, target, time or supported source-control exits. No portfolio or execution
+adapter is involved. Each runner owns its position limit, pending intents and open trades.
+
+`replay.metrics` derives closed-trade constant-risk statistics and diagnostic groups.
+`replay.io` enforces declared data usage and chunked prepared Parquet reads, writes ledgers
+and immutable manifests, and checks normalized replay comparisons. The engine retains
+completed bars and ledger rows but never the entire tick stream. Full-prefix strategy work
+is measured in docs/PERFORMANCE.md. Checkpoint recovery deterministically rebuilds the
+aggregator, strategy and open positions by replaying and verifying the saved input prefix.

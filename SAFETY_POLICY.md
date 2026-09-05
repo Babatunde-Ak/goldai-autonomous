@@ -2,7 +2,7 @@
 
 ## Current authorization
 
-Milestones 0 through 2 authorize research, observe-only market data and candidate evaluation. They contain no funded, live, paper-order, or DEMO-order authorization. MT5 DEMO execution remains disabled and non-operational. A READY decision or EntryIntent preview grants no execution permission.
+Milestones 0 through 3 authorize research, observe-only market data, candidate evaluation and offline deterministic simulated trades. They contain no funded, live, paper-order, or DEMO-order authorization. MT5 DEMO execution remains disabled and non-operational. A READY decision or EntryIntent preview grants no execution permission.
 
 ## Non-negotiable controls
 
@@ -24,3 +24,10 @@ No strategy may automatically move from RESEARCH to SHADOW, PAPER, or DEMO. A fu
 ## Incident posture
 
 If data is stale, spread is abnormal, a signal is duplicated, strategies conflict, session control rejects trading, macro-event status is unclear, or account type cannot be verified, the system must reject execution.
+
+## Offline replay boundary
+
+Replay has no broker adapter dependency, account sizing, credentials or order API.
+Simulated fills are research records, never execution authorizations. MT5 DEMO stays disabled;
+REAL, FUNDED, CONTEST and UNKNOWN stay blocked. The existing authorization and risk regression
+tests remain mandatory. No LLM, notification, portfolio routing or live paper loop is added.

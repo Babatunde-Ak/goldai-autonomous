@@ -50,3 +50,20 @@ Milestone 2 evidence is SYNTHETIC_SOURCE_PARITY_ONLY. Original reports remain at
 - Validate across regimes and plausible cost assumptions.
 - Distinguish development, robustness, shadow, paper, and DEMO evidence.
 - Reject results that depend on a narrow parameter peak or data error.
+
+## Milestone 3 replay protocol
+
+Persist and print `DATA_USAGE_DECLARATION` before reading selected prepared price partitions.
+Require exact manifest SHA and first/last timestamps, classification and `locked: false`.
+2026 is separate from development/robustness. July 2026 requires PREVIOUSLY_CONSUMED status
+and documented prior-consumption evidence. A declaration is an auditable user assertion,
+not an independent proof of authorization. Do not mislabel a locked dataset to bypass it.
+No real historical price periods were consumed for M3 validation.
+
+Use independent constant-risk results; never compound or combine strategy equity in M3.
+Baseline spread is embedded in exact Bid/Ask. Additional costs and delays are explicit
+separate scenarios. Full-prefix/reference benchmarks and synthetic correctness tests do
+not prove historical profitability. Unresolved trades remain visible and excluded from
+closed-trade metrics; never drop them to improve a result. Balanced's bar-horizon filtering
+and exact-tick primary replay are distinct semantics. Source outcome comparisons remain
+NOT_RERUN until matching data and exit contracts are actually evaluated.

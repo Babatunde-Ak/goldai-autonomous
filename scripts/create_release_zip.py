@@ -9,13 +9,15 @@ EXCLUDED_PARTS = {
     ".git",
     ".pytest_cache",
     ".venv",
+    "venv",
     "__pycache__",
     "build",
     "dist",
     "node_modules",
+    "runs",
 }
-EXCLUDED_NAMES = {".env", ".coverage"}
-EXCLUDED_SUFFIXES = {".pyc", ".pyo", ".log", ".sqlite", ".db"}
+EXCLUDED_NAMES = {".env", ".coverage", "checkpoint.json"}
+EXCLUDED_SUFFIXES = {".pyc", ".pyo", ".log", ".sqlite", ".db", ".pem", ".key", ".zip"}
 EXCLUDED_RUNTIME_DATA = {"data/raw", "data/canonical", "data/bars", "data/features"}
 
 
@@ -26,6 +28,8 @@ def should_include(path: Path, root: Path, output: Path) -> bool:
     if any(part.endswith(".egg-info") for part in relative.parts):
         return False
     if path.name in EXCLUDED_NAMES or path.suffix in EXCLUDED_SUFFIXES:
+        return False
+    if path.name.endswith(".usage.json"):
         return False
     if path.name.startswith(".env") and path.name != ".env.example":
         return False

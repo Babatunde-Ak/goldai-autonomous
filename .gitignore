@@ -37,3 +37,7 @@ data/features/*
 vault/*
 !vault/.gitkeep
 
+# Offline research outputs
+runs/
+*.usage.json
+/checkpoint.json

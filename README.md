@@ -6,7 +6,7 @@ Project owner: Babatunde Akanji
 
 ## Current milestone
 
-Version `0.3.0.dev0` implements Milestone 2 candidate strategy migration on the existing Milestone 1 market-data core.
+Version `0.4.0.dev0` adds Milestone 3 independent deterministic offline replay to the accepted Milestone 2 strategy contracts.
 
 Historical HistData ticks and optional MetaTrader 5 observations map into the same `MarketTick` domain contract. One deterministic UTC candle engine produces completed Bid and Ask bars for M1, M5, M15, M30, H1, H4, and D1.
 
@@ -66,7 +66,7 @@ python -m goldai strategies validate
 
 ## Not implemented
 
-- Backtesting, portfolio routing, complete risk evaluation, paper fills, or position accounting.
+- Portfolio routing, capital allocation, complete risk evaluation, or autonomous live paper trading.
 - MT5 order creation, modification, or closure.
 - Jarvis, local LLMs, Obsidian, Telegram, API, or web terminal.
 - Profitability validation or production readiness.
@@ -90,3 +90,22 @@ This repository is a pre-alpha engineering checkpoint. It makes no profitability
 Install candidate dependencies with `python -m pip install -e ".[strategies]"`, or all validation dependencies with `python -m pip install -e ".[dev,data]"`.
 EMA M15, Balanced POC long, Balanced PDL short, structural H1 and independent supply/demand 2R/3R variants retain recovered source rules. All remain RESEARCH with execution authorization NONE.
 See [strategy contracts](docs/STRATEGIES.md), [source map](docs/STRATEGY_MIGRATION_M2.md), and [evidence](docs/STRATEGY_EVIDENCE.md). Historical strategy replay has not been rerun in this checkpoint.
+
+## Milestone 3 offline replay
+
+Six independent strategy variants replay canonical Bid/Ask ticks with deterministic fills,
+constant-risk accounting, MFE/MAE, grouped metrics, JSONL/optional Parquet ledgers and
+fingerprinted manifests. This is a correctness reference engine, not a high-throughput
+multi-year replay implementation. All historical strategy outcome parity is `NOT_RERUN`.
+
+```bash
+python -m pip install -e ".[dev,data]"
+python -m goldai replay list-strategies
+python -m goldai replay run --strategy ema50_chandelier_m15_touch --synthetic --output runs/ema_fixture --json
+python -m goldai replay inspect runs/ema_fixture --json
+python -m goldai replay compare runs/ema_fixture runs/ema_fixture --json
+```
+
+See [replay guide](docs/REPLAY_ENGINE.md), [execution semantics](docs/EXECUTION_SEMANTICS.md),
+[reproducibility](docs/REPLAY_REPRODUCIBILITY.md), and [validation](docs/MILESTONE_3_VALIDATION.md).
+Each run is isolated. Offline simulated trades never call broker execution adapters.

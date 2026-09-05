@@ -56,6 +56,8 @@ def _doctor(config_path: str | None, check_mt5: bool = False) -> int:
         ("Account type", account_type),
         ("Strategy registry", f"PASS ({len(registry.all())} legacy IDs; M2 candidate-only catalog)"),
         ("Risk engine", "SCAFFOLDED / FAIL-CLOSED"),
+        ("Replay engine", "AVAILABLE (offline; 6 replay-capable variants)"),
+        ("Historical strategy parity", "NOT RERUN"),
         ("Broker mutation", "DISABLED"),
         ("Jarvis", "DISABLED"),
         ("Execution", config.execution_mode.value),
@@ -189,11 +191,20 @@ def build_parser() -> argparse.ArgumentParser:
     describe = strategy_commands.add_parser('describe', help='Describe frozen strategy identity and posture')
     describe.add_argument('strategy_id')
     strategy_commands.add_parser('validate', help='Validate import, registry and checkpoint contracts without executing trades')
+    from goldai.replay.cli import add_commands
+    add_commands(commands)
     return parser
 
 
 def main(argv: Sequence[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
+    if args.command == 'replay':
+        from goldai.replay.cli import execute
+        try:
+            return execute(args)
+        except (OSError, ValueError, RuntimeError, ImportError) as exc:
+            print(f'REPLAY FAILED: {exc}', file=sys.stderr)
+            return 2
     if args.command == "doctor":
         return _doctor(args.config, args.check_mt5)
     if args.command == "data" and args.data_command == "audit":
