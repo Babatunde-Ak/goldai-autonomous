@@ -21,3 +21,7 @@ Future measured optimizations may evaluate:
 - partition-level parallel preparation with deterministic merge order
 
 No optimization should change canonical serialization, rejection counts, candle boundaries, or parity results.
+
+## Milestone 2 candidate evaluation
+
+Candidate wrappers recompute from the full immutable prefix to preserve source warm-up and state semantics. Memory grows with bars; repeated prefix evaluation can approach quadratic total work over a long replay. Prefix hashing also scans history. This is a correctness checkpoint, not a measured high-throughput replay implementation. Incremental truncation and numeric optimization require equivalence tests.

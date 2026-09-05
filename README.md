@@ -6,11 +6,11 @@ Project owner: Babatunde Akanji
 
 ## Current milestone
 
-Version `0.2.0.dev0` implements Milestone 1, the canonical historical and observe-only live market-data core.
+Version `0.3.0.dev0` implements Milestone 2 candidate strategy migration on the existing Milestone 1 market-data core.
 
 Historical HistData ticks and optional MetaTrader 5 observations map into the same `MarketTick` domain contract. One deterministic UTC candle engine produces completed Bid and Ask bars for M1, M5, M15, M30, H1, H4, and D1.
 
-No strategy is operational. No broker order route exists. MT5 DEMO execution remains disabled. REAL, FUNDED, CONTEST, and UNKNOWN account mutation remains blocked by policy and code.
+Five strategy families now evaluate candidates with synthetic source-parity evidence. No broker order route exists. MT5 DEMO execution remains disabled. REAL, FUNDED, CONTEST, and UNKNOWN account mutation remains blocked by policy and code.
 
 ## Installation
 
@@ -43,6 +43,8 @@ python -m goldai data audit path/to/HISTDATA.zip --symbol XAUUSD --json
 python -m goldai data prepare path/to/HISTDATA.zip --symbol XAUUSD --output data/canonical
 python -m goldai data inspect data/canonical/XAUUSD/manifest.json
 python -m goldai strategies status
+python -m goldai strategies describe ema50_chandelier_m15_touch
+python -m goldai strategies validate
 ```
 
 `data audit` never modifies the source. It reports fingerprints, accepted and rejected rows, duplicates, chronology violations, timestamps, quality reasons, and exact spread percentiles. Use `--extreme-spread VALUE` to flag accepted ticks above a declared absolute spread threshold.
@@ -64,7 +66,6 @@ python -m goldai strategies status
 
 ## Not implemented
 
-- Trading strategy behavior or migration.
 - Backtesting, portfolio routing, complete risk evaluation, paper fills, or position accounting.
 - MT5 order creation, modification, or closure.
 - Jarvis, local LLMs, Obsidian, Telegram, API, or web terminal.
@@ -83,3 +84,9 @@ python -m goldai doctor
 ```
 
 This repository is a pre-alpha engineering checkpoint. It makes no profitability claim.
+
+## Milestone 2
+
+Install candidate dependencies with `python -m pip install -e ".[strategies]"`, or all validation dependencies with `python -m pip install -e ".[dev,data]"`.
+EMA M15, Balanced POC long, Balanced PDL short, structural H1 and independent supply/demand 2R/3R variants retain recovered source rules. All remain RESEARCH with execution authorization NONE.
+See [strategy contracts](docs/STRATEGIES.md), [source map](docs/STRATEGY_MIGRATION_M2.md), and [evidence](docs/STRATEGY_EVIDENCE.md). Historical strategy replay has not been rerun in this checkpoint.

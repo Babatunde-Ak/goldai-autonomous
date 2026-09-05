@@ -1,5 +1,9 @@
 # Architecture Decisions
 
+## ADR-M2: Recovered candidate kernels
+
+Retain the M1 data architecture and seven-ID registry API. Add an expanded M2 catalog, optional pinned numeric dependencies, immutable complete history inputs and deterministic candidate identities. Preserve recovered indicator seeds and source state transitions. Carry future quote-relative geometry as EntryIntent without execution or fills. Synthetic source parity is the evidence ceiling; historical replay is a separate milestone. All authorization remains NONE.
+
 ## ADR-001: Standard-library M0 core
 
 Milestone 0 uses dataclasses, enums, protocols, argparse, and JSON. This keeps runtime dependencies empty and reduces coupling before data and adapter requirements are proven.

@@ -2,7 +2,7 @@
 
 ## Current authorization
 
-Milestones 0 and 1 authorize research and observe-only market-data operation. They contain no funded, live, paper-order, or DEMO-order authorization. MT5 DEMO execution remains disabled and non-operational.
+Milestones 0 through 2 authorize research, observe-only market data and candidate evaluation. They contain no funded, live, paper-order, or DEMO-order authorization. MT5 DEMO execution remains disabled and non-operational. A READY decision or EntryIntent preview grants no execution permission.
 
 ## Non-negotiable controls
 

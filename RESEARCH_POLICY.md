@@ -4,6 +4,8 @@
 
 GoldAI reports profitability only from executed and reproducible experiments. Hypotheses, scaffolds, and unrun tests are never presented as results.
 
+Milestone 2 evidence is SYNTHETIC_SOURCE_PARITY_ONLY. Original reports remain attributed reference evidence. No historical profitability or production readiness is inferred from migration tests. Rejected M5 variants stay disabled, and incomplete future families stay non-operational.
+
 ## Chronology and holdouts
 
 - Split development and evaluation data chronologically.

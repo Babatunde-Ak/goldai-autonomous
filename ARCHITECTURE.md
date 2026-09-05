@@ -75,7 +75,7 @@ The adapter contains no broker mutation method. MetaTrader5 is optional because 
 
 ## Strategy boundary
 
-A strategy receives `MarketState` and returns `StrategyDecision`. It cannot execute an order. Milestone 1 does not implement or migrate strategy logic.
+A strategy receives `MarketState` and returns `StrategyDecision`. It cannot execute an order. Milestone 2 adds a completed immutable history prefix to MarketState and source-derived candidate wrappers. Pure numeric kernels depend only on optional NumPy/pandas and domain data. EntryIntent records future executable-quote geometry without a fill. Prefix hashes and deterministic signal IDs protect history integrity and duplicate suppression. See docs/STRATEGIES.md.
 
 ## Risk and execution boundary
 
@@ -85,7 +85,7 @@ The required downstream order remains:
 Strategy -> Portfolio Router -> Risk Engine -> Execution Authorization -> Adapter
 ```
 
-Milestone 1 keeps fail-closed authorization. MT5 DEMO execution remains disabled. REAL, FUNDED, CONTEST, and UNKNOWN account types remain blocked.
+Milestone 2 keeps fail-closed authorization. MT5 DEMO execution remains disabled. REAL, FUNDED, CONTEST, and UNKNOWN account types remain blocked.
 
 ## Dependency rule
 

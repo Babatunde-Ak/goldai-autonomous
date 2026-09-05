@@ -310,6 +310,7 @@ class MarketState:
     latest_tick: MarketTick | None = None
     latest_bars: dict[Timeframe, MarketBar] = field(default_factory=dict)
     stale: bool = True
+    history: dict[Timeframe, tuple[MarketBar, ...]] = field(default_factory=dict)
 
     def __post_init__(self) -> None:
         _require_aware(self.timestamp)

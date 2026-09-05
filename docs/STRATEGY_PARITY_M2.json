@@ -1,0 +1,22 @@
+{
+  "classification": "SYNTHETIC_SOURCE_PARITY_ONLY",
+  "historical_replay": false,
+  "seeds": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7
+  ],
+  "ema": 31,
+  "supply": 27,
+  "poc": 13,
+  "pdl": 115,
+  "feature_prefixes": 16,
+  "structural_prefixes": 72,
+  "structural_ready": 2,
+  "status": "PASS"
+}

@@ -3,6 +3,7 @@ from __future__ import annotations
 import argparse
 import json
 import sys
+from dataclasses import asdict
 from collections.abc import Sequence
 from pathlib import Path
 
@@ -12,6 +13,7 @@ from goldai.data import DataManifest, audit_histdata, prepare_histdata
 from goldai.data.persistence import duckdb_available, parquet_available
 from goldai.mt5 import MT5DependencyStatus, MT5ObserveMarketDataAdapter
 from goldai.strategies import default_registry
+from goldai.strategies.registry import migration_registry
 
 
 def _doctor(config_path: str | None, check_mt5: bool = False) -> int:
@@ -52,7 +54,7 @@ def _doctor(config_path: str | None, check_mt5: bool = False) -> int:
         ("MT5 dependency", mt5_status.value.replace("_", " ")),
         ("MT5 connection", mt5_connection),
         ("Account type", account_type),
-        ("Strategy registry", f"PASS ({len(registry.all())} scaffolded)"),
+        ("Strategy registry", f"PASS ({len(registry.all())} legacy IDs; M2 candidate-only catalog)"),
         ("Risk engine", "SCAFFOLDED / FAIL-CLOSED"),
         ("Broker mutation", "DISABLED"),
         ("Jarvis", "DISABLED"),
@@ -115,11 +117,42 @@ def _data_inspect(args: argparse.Namespace) -> int:
 
 def _strategies_status() -> int:
     print("Strategy ID | Version | Timeframe | Status | Authorization | Research")
-    for record in default_registry().all():
+    for record in migration_registry().all():
         print(
             f"{record.strategy_id} | {record.version} | {record.timeframe.value} | "
             f"{record.status.value} | {record.execution_authorization.value} | {record.research_status}"
         )
+    return 0
+
+
+def _strategies_describe(strategy_id: str) -> int:
+    try:
+        record = migration_registry().get(strategy_id)
+    except KeyError as exc:
+        print(str(exc), file=sys.stderr)
+        return 2
+    print(json.dumps(asdict(record), sort_keys=True, indent=2))
+    return 0
+
+
+def _strategies_validate() -> int:
+    from goldai.strategies.models import ExecutionAuthorization
+    records = migration_registry().all()
+    if any(r.execution_authorization is not ExecutionAuthorization.NONE for r in records):
+        print('FAIL: execution authorization is not NONE')
+        return 2
+    try:
+        from goldai.strategies.migrated import build_strategy
+        for identity in ('ema50_chandelier_m15_touch','xauusd_structural_break_trend_v1',
+                         'm15_supply_demand','m15_supply_demand_2r',
+                         'poc_continuation_retest_long','pdh_pdl_breakout_retest'):
+            engine = build_strategy(identity)
+            engine.restore(engine.snapshot())
+            assert engine.strategy_id == identity
+    except ImportError:
+        print('NOT AVAILABLE: install the pinned [strategies] extra')
+        return 3
+    print('PASS: six candidate variants import and restore; all authorizations NONE. No fills. Not historical parity validation.')
     return 0
 
 
@@ -151,7 +184,11 @@ def build_parser() -> argparse.ArgumentParser:
     inspect_command.add_argument("--json", action="store_true")
 
     strategies = commands.add_parser("strategies", help="Strategy registry commands")
-    strategies.add_subparsers(dest="strategies_command", required=True).add_parser("status", help="List strategy status")
+    strategy_commands = strategies.add_subparsers(dest="strategies_command", required=True)
+    strategy_commands.add_parser("status", help="List strategy status")
+    describe = strategy_commands.add_parser('describe', help='Describe frozen strategy identity and posture')
+    describe.add_argument('strategy_id')
+    strategy_commands.add_parser('validate', help='Validate import, registry and checkpoint contracts without executing trades')
     return parser
 
 
@@ -170,5 +207,9 @@ def main(argv: Sequence[str] | None = None) -> int:
         return _data_inspect(args)
     if args.command == "strategies" and args.strategies_command == "status":
         return _strategies_status()
+    if args.command == 'strategies' and args.strategies_command == 'describe':
+        return _strategies_describe(args.strategy_id)
+    if args.command == 'strategies' and args.strategies_command == 'validate':
+        return _strategies_validate()
     print("NOT IMPLEMENTED", file=sys.stderr)
     return 3
