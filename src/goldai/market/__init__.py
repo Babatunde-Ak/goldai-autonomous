@@ -1,4 +1,5 @@
 from goldai.market.models import (
+    BarStatus,
     MarketBar,
     MarketSession,
     MarketState,
@@ -9,6 +10,7 @@ from goldai.market.models import (
 )
 
 __all__ = [
+    "BarStatus",
     "MarketBar",
     "MarketSession",
     "MarketState",
@@ -17,4 +19,3 @@ __all__ = [
     "SymbolSpecification",
     "Timeframe",
 ]
-

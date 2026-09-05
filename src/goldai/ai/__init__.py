@@ -1,2 +1,1 @@
-"""Local supervisory AI is disabled and intentionally absent in Milestone 0."""
-
+"""Local supervisory AI is disabled and intentionally absent through Milestone 1."""

@@ -45,7 +45,7 @@ class GoldAIConfig:
         if not self.symbols or any(not symbol.strip() for symbol in self.symbols):
             raise ValueError("at least one valid symbol is required")
         if self.execution_mode is ExecutionMode.DEMO:
-            raise ValueError("DEMO mode cannot be enabled by Milestone 0 configuration")
+            raise ValueError("DEMO mode cannot be enabled by Milestone 0 or Milestone 1 configuration")
 
 
 def _config_from_dict(data: dict[str, Any]) -> GoldAIConfig:
@@ -73,4 +73,3 @@ def load_config(path: str | Path | None = None) -> GoldAIConfig:
     if not isinstance(data, dict):
         raise ValueError("configuration root must be an object")
     return _config_from_dict(data)
-

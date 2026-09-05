@@ -38,8 +38,7 @@ class MT5DemoExecutionAdapter(Protocol):
 
 
 class DisabledMT5DemoExecutionAdapter:
-    """Explicit non-operational boundary for Milestone 0."""
+    """Explicit non-operational boundary for Milestone 0 and Milestone 1."""
 
     def execute(self, request: ExecutionRequest) -> ExecutionResult:
-        raise PermissionError("MT5 DEMO execution is disabled in Milestone 0")
-
+        raise PermissionError("MT5 DEMO execution is disabled in Milestone 0 and Milestone 1")

@@ -2,8 +2,8 @@
 
 | Milestone | Scope |
 |---|---|
-| M0 | Architecture foundation, safe contracts, CLI, tests, and CI |
-| M1 | Canonical historical and live market-data core |
+| M0 | Accepted: architecture foundation, safe contracts, CLI, tests, and CI |
+| M1 | Implemented: canonical historical and observe-only live market-data core |
 | M2 | Verified strategy migration without behavior drift |
 | M3 | Unified deterministic replay and backtest engine |
 | M4 | Portfolio router and complete risk engine |
@@ -16,5 +16,4 @@
 | M11 | Dedicated scalping research |
 | M12 | Fresh-data validation and ML or meta-model research |
 
-Every milestone requires review. M0 does not authorize work from M1 onward.
-
+Every milestone requires review. Milestone 1 does not authorize Milestone 2 strategy migration or any broker mutation.

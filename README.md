@@ -1,14 +1,16 @@
 # GoldAI Autonomous V1
 
-GoldAI Autonomous is a research-first engineering foundation for deterministic XAUUSD and Forex strategy evaluation, paper trading, and future guarded MetaTrader 5 DEMO execution.
+GoldAI Autonomous is a research-first foundation for deterministic XAUUSD and Forex strategy evaluation.
 
 Project owner: Babatunde Akanji
 
 ## Current milestone
 
-Version `0.1.0-dev0` implements Milestone 0 only. It defines domain boundaries, safe configuration, a strategy registry, auditable events, storage contracts, execution interfaces, a CLI foundation, tests, and CI.
+Version `0.2.0.dev0` implements Milestone 1, the canonical historical and observe-only live market-data core.
 
-No strategy is operational. No broker order route exists. MT5 DEMO execution is explicitly disabled. REAL, FUNDED, CONTEST, and UNKNOWN account mutation is blocked by policy and code.
+Historical HistData ticks and optional MetaTrader 5 observations map into the same `MarketTick` domain contract. One deterministic UTC candle engine produces completed Bid and Ask bars for M1, M5, M15, M30, H1, H4, and D1.
+
+No strategy is operational. No broker order route exists. MT5 DEMO execution remains disabled. REAL, FUNDED, CONTEST, and UNKNOWN account mutation remains blocked by policy and code.
 
 ## Installation
 
@@ -16,76 +18,68 @@ Python 3.12 or 3.13 is recommended.
 
 ```bash
 python -m venv .venv
+python -m pip install -e ".[dev]"
 ```
 
-Activate the environment, then install the project and development tools:
+Install optional historical persistence support:
 
 ```bash
-python -m pip install -e ".[dev]"
+python -m pip install -e ".[data]"
+```
+
+Install the official MetaTrader5 dependency only on a supported Windows environment:
+
+```bash
+python -m pip install -e ".[mt5]"
 ```
 
 ## CLI
 
 ```bash
 python -m goldai doctor
-python -m goldai --config config/default.json doctor
-python -m goldai data audit
+python -m goldai doctor --check-mt5
+python -m goldai data audit path/to/HISTDATA.csv --symbol XAUUSD
+python -m goldai data audit path/to/HISTDATA.zip --symbol XAUUSD --json
+python -m goldai data prepare path/to/HISTDATA.zip --symbol XAUUSD --output data/canonical
+python -m goldai data inspect data/canonical/XAUUSD/manifest.json
 python -m goldai strategies status
 ```
 
-`data audit` intentionally exits with a clear `NOT IMPLEMENTED` result until Milestone 1 provides the historical data core.
+`data audit` never modifies the source. It reports fingerprints, accepted and rejected rows, duplicates, chronology violations, timestamps, quality reasons, and exact spread percentiles. Use `--extreme-spread VALUE` to flag accepted ticks above a declared absolute spread threshold.
 
-## Repository structure
-
-```text
-src/goldai/       Python package and domain boundaries
-tests/            Automated architecture and safety tests
-docs/             Supplemental design records
-config/           Safe example configuration
-scripts/          Development and release helpers
-data/             Ignored raw, canonical, bar, and feature data
-vault/            Reserved local memory directory, ignored by default
-.github/workflows Continuous integration
-```
+`data prepare` requires the optional `data` dependencies. It writes reusable Parquet partitions under `symbol/year/month`, then writes a deterministic JSON manifest containing source provenance and the canonical data fingerprint.
 
 ## Implemented
 
-- Canonical market models for ticks, bars, timeframes, symbol specifications, spreads, sessions, and market state.
-- Deterministic strategy interface and typed decisions.
-- Seven-entry research registry with no execution authorization.
-- Deterministic, timestamped, serializable events.
-- Fail-closed account and execution authorization.
-- Paper, observe-only, and MT5 DEMO adapter boundaries.
-- Typed JSON configuration with `OBSERVE_ONLY` as the safe default.
-- Technology-neutral storage contracts.
-- Structured JSON logging with correlation fields.
-- CLI diagnostics and strategy status.
-- Pytest coverage of the M0 safety and domain rules.
-- Secret-free GitHub Actions CI.
+- Canonical ticks with UTC timestamps, Bid, Ask, optional Last and volumes, source sequence, flags, provenance, spread derivation, and deterministic serialization.
+- Streaming HistData Generic ASCII ingestion from `.csv`, `.txt`, and `.zip` sources.
+- Explicit malformed, duplicate, out-of-order, non-positive, Bid-above-Ask, and extreme-spread quality states.
+- Disk-backed duplicate tracking and exact spread quantiles without retaining the full tick stream in RAM.
+- Canonical completed Bid and Ask candles for M1 through D1 with no look-ahead.
+- Optional chunked Parquet persistence and DuckDB queries.
+- Machine-readable preparation manifests and SHA-256 fingerprints.
+- Optional observe-only MT5 initialization, symbol metadata, ticks, rates, and account classification.
+- Historical and synthetic MT5 parity tests using the same candle engine.
+- Milestone 0 domain, strategy, risk, execution, event, storage, and safety contracts.
 
 ## Not implemented
 
-- Historical data importing, auditing, or replay.
-- Live MT5 connectivity.
-- Any trading strategy behavior.
-- Portfolio routing or a complete risk engine.
-- Paper fills and position accounting.
-- MT5 DEMO or real-money order execution.
+- Trading strategy behavior or migration.
+- Backtesting, portfolio routing, complete risk evaluation, paper fills, or position accounting.
+- MT5 order creation, modification, or closure.
 - Jarvis, local LLMs, Obsidian, Telegram, API, or web terminal.
-- Strategy optimization, ML training, or profitability validation.
+- Profitability validation or production readiness.
 
-## Development workflow
+## Data policy
 
-1. Work on `goldai-autonomous-v1` during Milestone 0.
-2. Keep `main` stable.
-3. Add tests for every domain or safety change.
-4. Run `python -m pytest` and `python -m compileall -q src`.
-5. Never modify final holdout evidence or commit credentials.
-6. Promote strategies only through a future explicit review process.
+Raw archives remain outside source control. GoldAI does not silently repair invalid rows. Canonical timestamps use UTC. Strategy logic will receive only completed bars. See [docs/DATA.md](docs/DATA.md), [RESEARCH_POLICY.md](RESEARCH_POLICY.md), and [SAFETY_POLICY.md](SAFETY_POLICY.md).
 
-Read [ARCHITECTURE.md](ARCHITECTURE.md), [SAFETY_POLICY.md](SAFETY_POLICY.md), and [RESEARCH_POLICY.md](RESEARCH_POLICY.md) before implementing later milestones.
+## Development checks
 
-## Status
+```bash
+python -m pytest --cov=goldai
+python -m compileall -q src
+python -m goldai doctor
+```
 
-This repository is a pre-alpha architecture checkpoint. It is not production-ready and makes no profitability claim.
-
+This repository is a pre-alpha engineering checkpoint. It makes no profitability claim.

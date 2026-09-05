@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "goldai-autonomous"
-version = "0.1.0.dev0"
+version = "0.2.0.dev0"
 description = "Research-first architecture for deterministic XAUUSD and Forex strategy evaluation"
 readme = "README.md"
 requires-python = ">=3.12"
@@ -22,6 +22,8 @@ dependencies = []
 
 [project.optional-dependencies]
 dev = ["pytest>=8.3", "pytest-cov>=6.0"]
+data = ["duckdb>=1.1", "pyarrow>=18"]
+mt5 = ["MetaTrader5>=5.0; platform_system == 'Windows'"]
 
 [project.scripts]
 goldai = "goldai.cli.main:main"
@@ -33,6 +35,5 @@ package-dir = {"" = "src"}
 where = ["src"]
 
 [tool.pytest.ini_options]
-addopts = "-ra --strict-markers"
+addopts = "-ra --strict-markers --cov=goldai --cov-report=term-missing --cov-fail-under=80"
 testpaths = ["tests"]
-

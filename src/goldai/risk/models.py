@@ -40,7 +40,7 @@ class RiskPolicy(Protocol):
 
 
 def authorize_execution(context: RiskContext) -> RiskDecision:
-    """Fail-closed M0 authorization. Paper may be authorized, MT5 DEMO stays disabled."""
+    """Fail-closed authorization. Paper may be authorized, MT5 DEMO stays disabled."""
     if context.account_type in {
         AccountType.REAL,
         AccountType.FUNDED,
@@ -51,7 +51,7 @@ def authorize_execution(context: RiskContext) -> RiskDecision:
     if context.execution_mode in {ExecutionMode.RESEARCH, ExecutionMode.OBSERVE_ONLY}:
         return RiskDecision(False, f"Mode {context.execution_mode.value} does not authorize execution")
     if context.execution_mode is ExecutionMode.DEMO:
-        return RiskDecision(False, "MT5 DEMO execution is disabled in Milestone 0")
+        return RiskDecision(False, "MT5 DEMO execution is disabled in Milestone 0 and Milestone 1")
     if context.strategy_authorization is not ExecutionAuthorization.PAPER:
         return RiskDecision(False, "Strategy lacks PAPER authorization")
     checks = {
@@ -66,4 +66,3 @@ def authorize_execution(context: RiskContext) -> RiskDecision:
         if not passed:
             return RiskDecision(False, reason)
     return RiskDecision(True, "PAPER execution authorized")
-

@@ -2,80 +2,91 @@
 
 ## Design goals
 
-GoldAI separates market data, strategies, risk, execution, and persistence. The domain package does not depend on MetaTrader 5, a web framework, an LLM, or a database driver.
+GoldAI separates market data, strategies, risk, execution, and persistence. Domain modules do not depend on MetaTrader 5, a web framework, an LLM, PyArrow, DuckDB, or a database driver.
 
-## Long-term flow
-
-```text
-Historical Data / Live MT5
-            |
-            v
-Canonical Market Engine
-            |
-            v
-        Indicators
-            |
-            v
-     Strategy Engines
-            |
-            v
-Regime / Portfolio Router
-            |
-            v
-       Risk Engine
-            |
-            v
-Paper / MT5 DEMO Execution
-            |
-            v
-      Trade Database
-            |
-            v
-     Jarvis + Memory
-            |
-            v
-Telegram + Web Terminal
-```
-
-## Canonical market boundary
-
-HistData Bid/Ask ticks and future live MT5 Bid/Ask ticks must map to the same `MarketTick`. Strategy code consumes canonical objects and never imports MetaTrader5.
+## Milestone 1 market-data flow
 
 ```text
-Historical HistData Bid/Ask ticks -> Canonical MarketTick <- Live MT5 Bid/Ask ticks
+HistData file or ZIP                      MetaTrader 5
+        |                                      |
+        v                                      v
+Historical adapter                     Observe-only adapter
+        |                                      |
+        +----------> Canonical MarketTick <----+
+                            |
+                            v
+                Canonical candle engine
+                            |
+                            v
+             M1 M5 M15 M30 H1 H4 D1 bars
+                            |
+                            v
+                 Future MarketState use
 ```
 
-Adapters own source-specific parsing, precision, sequencing, and connection behavior. Canonical validation rejects non-positive prices, naive timestamps, and `bid > ask`.
+Both adapters map source-specific records into the same immutable type. Broker objects do not enter domain or strategy modules. Source and provenance metadata remain available for audit but do not change source-neutral market semantics.
+
+## Canonical tick contract
+
+`MarketTick` contains a normalized symbol, timezone-aware UTC timestamp, positive finite Bid and Ask, optional Last, optional Bid, Ask, and Last volumes, source, source sequence, flags, and metadata.
+
+The contract rejects naive timestamps, non-positive prices, non-finite prices, Bid above Ask, negative volumes, blank symbols, and blank sources. Serialization has stable field names and JSON key ordering. Canonical fingerprints exclude adapter-specific source metadata.
+
+## HistData boundary
+
+The historical adapter streams Generic ASCII rows from plain text or ZIP members. It never changes the source. SHA-256 fingerprints identify the original file or archive.
+
+Quality findings are explicit: `VALID`, `MALFORMED`, `DUPLICATE`, `OUT_OF_ORDER`, `NON_POSITIVE_PRICE`, `BID_ABOVE_ASK`, `EXTREME_SPREAD`, and `UNSUPPORTED_FORMAT`.
+
+Temporary SQLite tables provide full-stream duplicate detection and exact spread quantiles without a tick-sized in-memory collection. Accepted tick delivery remains iterator based.
+
+## Candle boundary
+
+The candle engine floors timestamps against Unix epoch boundaries in UTC. It maintains only one working bar per timeframe. A bar becomes available only when a tick crosses its close boundary or an explicit observation boundary proves the period complete.
+
+Completed bars preserve Bid OHLC, Ask OHLC, tick count, available volume, minimum spread, mean spread, maximum spread, UTC open timestamp, UTC close boundary, and `COMPLETE` status. Historical and live-style data use the same implementation.
+
+## Historical persistence
+
+```text
+Raw archive
+    |
+    v
+Validated canonical iterator
+    |
+    v
+Chunked Parquet partitions
+    |
+    +----> symbol/year/month/ticks-NNNNN.parquet
+    |
+    +----> symbol/manifest.json
+    |
+    v
+Optional DuckDB query view
+```
+
+PyArrow and DuckDB are optional dependencies. Imports remain safe when they are unavailable. Parquet metadata records the canonical schema version. The manifest records source provenance, audit counts, output locations, source fingerprint, canonical fingerprint, and creation time.
+
+## MT5 observe boundary
+
+The MT5 adapter imports the official package lazily. It can initialize a terminal, confirm symbol availability, read symbol specifications, map current and historical ticks, read rates, and classify the observed account as DEMO, REAL, CONTEST, or UNKNOWN.
+
+The adapter contains no broker mutation method. MetaTrader5 is optional because Linux, CI, Termux, and offline research environments may not provide it.
 
 ## Strategy boundary
 
-A strategy receives `MarketState` and returns `StrategyDecision`. It cannot execute an order. Decision state is explicit: `IDLE`, `FORMING`, `WAITING`, `READY`, `INVALIDATED`, or `COOLDOWN`.
-
-The registry stores identity, version, symbol, timeframe, research status, runtime status, and execution authorization. Registration never promotes a strategy.
+A strategy receives `MarketState` and returns `StrategyDecision`. It cannot execute an order. Milestone 1 does not implement or migrate strategy logic.
 
 ## Risk and execution boundary
 
-The required downstream order is:
+The required downstream order remains:
 
 ```text
 Strategy -> Portfolio Router -> Risk Engine -> Execution Authorization -> Adapter
 ```
 
-Milestone 0 uses fail-closed authorization. MT5 DEMO execution is disabled even for a DEMO account. REAL, FUNDED, CONTEST, and UNKNOWN account types are rejected before other checks.
-
-## Events and auditability
-
-Events use canonical UTC timestamps and deterministic SHA-256-derived identifiers over canonical content. Replaying identical input produces the same event identifier. Correlation IDs connect market input, decisions, risk outcomes, and future fills without logging credentials.
-
-## Configuration
-
-Configuration is typed and loaded from JSON. `OBSERVE_ONLY` is the default. Milestone 0 rejects `DEMO` configuration at load time. A later milestone must add an explicit, tested DEMO promotion workflow without weakening account classification.
-
-## Storage direction
-
-The initial interface supports ticks, bars, decisions, signals, positions, trades, outcomes, events, research runs, strategy versions, and reports. Operational metadata may begin with SQLite. Historical bulk data should use Parquet with DuckDB-compatible schemas.
+Milestone 1 keeps fail-closed authorization. MT5 DEMO execution remains disabled. REAL, FUNDED, CONTEST, and UNKNOWN account types remain blocked.
 
 ## Dependency rule
 
-Dependencies point inward. Domain code remains framework-neutral. Broker, persistence, notifications, AI, and UI integrations remain adapters outside deterministic strategy logic.
-
+Dependencies point inward. Source adapters depend on canonical domain types. Canonical domain types do not depend on adapters. Persistence, broker, notifications, AI, and UI integrations stay outside deterministic strategy logic.

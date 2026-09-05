@@ -16,6 +16,7 @@ EXCLUDED_PARTS = {
 }
 EXCLUDED_NAMES = {".env", ".coverage"}
 EXCLUDED_SUFFIXES = {".pyc", ".pyo", ".log", ".sqlite", ".db"}
+EXCLUDED_RUNTIME_DATA = {"data/raw", "data/canonical", "data/bars", "data/features"}
 
 
 def should_include(path: Path, root: Path, output: Path) -> bool:
@@ -28,6 +29,9 @@ def should_include(path: Path, root: Path, output: Path) -> bool:
         return False
     if path.name.startswith(".env") and path.name != ".env.example":
         return False
+    relative_parent = relative.parent.as_posix()
+    if any(relative_parent == item or relative_parent.startswith(f"{item}/") for item in EXCLUDED_RUNTIME_DATA):
+        return path.name == ".gitkeep"
     return path.is_file()
 
 

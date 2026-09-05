@@ -1,4 +1,3 @@
-from goldai.storage.contracts import GoldAIStorage
+from goldai.storage.contracts import GoldAIStorage, HistoricalTickStore
 
-__all__ = ["GoldAIStorage"]
-
+__all__ = ["GoldAIStorage", "HistoricalTickStore"]

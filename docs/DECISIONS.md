@@ -16,3 +16,14 @@ Event IDs derive from canonical event content. Identical replay input produces i
 
 Historical bulk data should use Parquet schemas queryable by DuckDB. Operational metadata can begin in SQLite behind the storage contract.
 
+## ADR-005: One source-neutral tick and candle path
+
+HistData and MT5 observations map into `MarketTick`. The canonical candle engine consumes only that type. Source metadata remains available for provenance but is excluded from source-neutral parity comparisons and canonical fingerprints.
+
+## ADR-006: Disk-backed audit statistics
+
+Data audit stores temporary spread observations and duplicate fingerprints on disk. This produces exact spread percentiles and non-adjacent duplicate detection without retaining the full tick stream in RAM.
+
+## ADR-007: Optional market-data dependencies
+
+PyArrow, DuckDB, and MetaTrader5 load only inside their adapters. Core imports and HistData audits work without them. Linux and Termux environments do not require MetaTrader5.

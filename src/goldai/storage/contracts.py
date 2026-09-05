@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from collections.abc import Iterable, Iterator
 from typing import Any, Protocol
 
 from goldai.events import Event
@@ -32,3 +33,10 @@ class GoldAIStorage(Protocol):
 
     def save_daily_report(self, report: dict[str, Any]) -> None: ...
 
+
+class HistoricalTickStore(Protocol):
+    """Streaming persistence boundary for canonical historical ticks."""
+
+    def write_ticks(self, ticks: Iterable[MarketTick]) -> object: ...
+
+    def read_ticks(self, paths: Iterable[str] | None = None) -> Iterator[MarketTick]: ...

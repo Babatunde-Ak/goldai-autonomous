@@ -2,7 +2,7 @@
 
 ## Current authorization
 
-Milestone 0 authorizes research and observe-only operation. It contains no funded or live trading authorization. MT5 DEMO execution remains disabled and non-operational.
+Milestones 0 and 1 authorize research and observe-only market-data operation. They contain no funded, live, paper-order, or DEMO-order authorization. MT5 DEMO execution remains disabled and non-operational.
 
 ## Non-negotiable controls
 
@@ -19,9 +19,8 @@ Milestone 0 authorizes research and observe-only operation. It contains no funde
 
 ## Promotion policy
 
-No strategy may automatically move from RESEARCH to SHADOW, PAPER, or DEMO. A future promotion process must require independent evidence, version pinning, explicit human approval, and regression tests. Milestone 0 provides no route to REAL or funded trading.
+No strategy may automatically move from RESEARCH to SHADOW, PAPER, or DEMO. A future promotion process must require independent evidence, version pinning, explicit human approval, and regression tests. Milestone 1 provides no route to DEMO, REAL, funded, contest, or unknown-account mutation.
 
 ## Incident posture
 
 If data is stale, spread is abnormal, a signal is duplicated, strategies conflict, session control rejects trading, macro-event status is unclear, or account type cannot be verified, the system must reject execution.
-
